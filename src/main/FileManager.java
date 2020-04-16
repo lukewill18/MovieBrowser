@@ -11,19 +11,18 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Collection;
 
-public class FileManager {
+class FileManager {
     private String VLCLocation = "";
     private static final String DATA_CACHE_DIR = ".movieBrowserCache";
-    private static final String VLC_PATH_CACHE = DATA_CACHE_DIR + "/.vlcPath.cache";
+    static final String VLC_PATH_CACHE = DATA_CACHE_DIR + "/.vlcPath.cache";
     private static final String API_URL = "http://www.omdbapi.com/?t=%s&y=%s&apikey=8b79c8d6";
 
-    FileManager() {
-    }
+    FileManager() { }
     Collection<File> getMovieFiles() {
         File dir = new File(".");
         return FileUtils.listFiles(
                 dir,
-                new String[]{"mkv", "mp4", "avi"},
+                new String[]{"mkv", "mp4", "avi", "VOB"},
                 true
         );
     }
@@ -74,7 +73,7 @@ public class FileManager {
         }
     }
 
-    private void chooseVLCFile(File pathCache, Stage primaryStage) {
+    void chooseVLCFile(File pathCache, Stage primaryStage) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Setup - Select VLC.exe");
         File selectedFile = fileChooser.showOpenDialog(primaryStage);
@@ -124,7 +123,9 @@ public class FileManager {
         JSONObject jsonResponse =  new JSONObject(response.toString());
         cacheResponse(response.toString(), cacheFile);
         if(jsonResponse.has("Error")) {
-            return null;
+            return new MovieInfo(cacheFile.getName().substring(8, cacheFile.getName().length() - 9),
+                    cacheFile.getName().substring(1, 5), "", "",  "file:.style/filenotfound.png",
+                    absolutePath, subtitleAbsolutePath, "", "");
         }
         return new MovieInfo(jsonResponse.getString("Title"), jsonResponse.getString("Year"),
                 jsonResponse.getString("Genre"), jsonResponse.getString("Plot"),
@@ -147,10 +148,11 @@ public class FileManager {
                 response.append(inputLine);
             }
             in.close();
-            JSONObject jsonResponse =  new JSONObject(response.toString());
+            JSONObject jsonResponse = new JSONObject(response.toString());
             cacheResponse(response.toString(), cacheFile);
             if(jsonResponse.has("Error")) {
-                return null;
+                return new MovieInfo(originalTitle, year, "", "",  "file:.style/filenotfound.png",
+                        absolutePath, subtitleAbsolutePath, "", "");
             }
             return new MovieInfo(originalTitle, year, jsonResponse.getString("Genre"),
                     jsonResponse.getString("Plot"), jsonResponse.getString("Poster"), absolutePath,

@@ -34,7 +34,7 @@
 }
 
 .glowing > .label {
-  -fx-text-fill: black !important;
+    -fx-text-fill: black !important;
 }
 
 .glowing {

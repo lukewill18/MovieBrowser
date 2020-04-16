@@ -3,28 +3,16 @@ package main;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.TextAlignment;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.apache.commons.io.FileUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -71,10 +59,12 @@ public class Main extends Application {
             ImageView poster = nodeManager.generatePoster(movieInfo);
             Label label = nodeManager.generatePosterLabel(movieInfo.title, movieInfo.year);
 
-            Tooltip plotSummary = new Tooltip(movieInfo.plot  + "\nIMDB Rating: " + movieInfo.imdbRating +
-                    "\nDirector: " + movieInfo.director);
-            plotSummary.setPrefWidth(500);
-            Tooltip.install(imageViewWrapper, plotSummary);
+            if(movieInfo.plot.length() > 0) { // In case movie info is not found in database
+                Tooltip plotSummary = new Tooltip(movieInfo.plot  + "\nIMDB Rating: " + movieInfo.imdbRating +
+                        "\nDirector: " + movieInfo.director + "\nGenres: " + String.join(", ", movieInfo.genres));
+                plotSummary.setPrefWidth(500);
+                Tooltip.install(imageViewWrapper, plotSummary);
+            }
 
             imageViewWrapper.getChildren().addAll(poster, label);
             movieInfo.setView(imageViewWrapper);
@@ -87,7 +77,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception {
         allGenres = new HashSet<>();
         fileManager = new FileManager();
-        nodeManager = new NodeManager(fileManager);
+        nodeManager = new NodeManager(fileManager, primaryStage);
         fileManager.createCacheIfNoneExists();
 
         // Check if VLC location is specified

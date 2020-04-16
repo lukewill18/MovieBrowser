@@ -2,19 +2,25 @@ package main;
 
 import com.google.common.collect.Multimap;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.Stage;
 
+import java.io.File;
 import java.util.*;
 
-public class NodeManager {
+class NodeManager {
     static class yearAscendingComparator implements Comparator<MovieInfo> {
         @Override
         public int compare(MovieInfo movieInfo1, MovieInfo movieInfo2) {
@@ -55,15 +61,20 @@ public class NodeManager {
 
     private Comparator<MovieInfo> currentComparator;
     private List<MovieInfo> inCurrentFolder;
+    private List<MovieInfo> currentlyDisplayed;
+
     private String currentGenre;
     private HashSet<MovieInfo> randomPool;
+    private Stage primaryStage;
 
-    NodeManager(FileManager f) {
+    NodeManager(FileManager f, Stage p) {
         currentComparator = new yearAscendingComparator();
         currentGenre = "All";
         randomPool = new HashSet<>();
         inCurrentFolder = new ArrayList<>();
+        currentlyDisplayed = new ArrayList<>();
         fileManager = f;
+        primaryStage = p;
     }
 
     void setInCurrentFolder(List<MovieInfo> movieInfos) {
@@ -88,6 +99,7 @@ public class NodeManager {
                 movieInfo.view.toBack();
             }
         }
+        currentlyDisplayed = movieInfos;
     }
 
     private List<MovieInfo> filterGenre(Collection<MovieInfo> toFilter, String genre) {
@@ -192,7 +204,6 @@ public class NodeManager {
         button.setOnAction(event -> {
             MovieInfo movieInfo = null;
             if(randomPool.isEmpty()) {
-                List<MovieInfo> currentlyDisplayed = filterGenre(inCurrentFolder, currentGenre);
                 if(!currentlyDisplayed.isEmpty()) {
                     movieInfo = currentlyDisplayed.get(random.nextInt(currentlyDisplayed.size()));
                 }
@@ -254,6 +265,19 @@ public class NodeManager {
         return label;
     }
 
+    private Button generateLocateVLCButton() {
+        Button button = new Button("Set VLC Location");
+        button.setOnAction(event -> {
+            try {
+                fileManager.chooseVLCFile(new File(FileManager.VLC_PATH_CACHE), primaryStage);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+        return button;
+    }
+
     private TextField generateSearchBar() {
         TextField textBox = new TextField();
         textBox.setPromptText("Search");
@@ -292,16 +316,22 @@ public class NodeManager {
                             Set<String> allGenres) {
         ToolBar toolBar = new ToolBar();
         toolBar.getStyleClass().add("control-bar");
-        toolBar.getItems().add(new Label("Enclosing Folder:"));
-        toolBar.getItems().add(generateEnclosingFolderComboBox(folderMap, movieInfos));
-        toolBar.getItems().add(new Label("Sort By:"));
-        toolBar.getItems().add(generateSortByComboBox());
-        toolBar.getItems().add(new Label("Genre:"));
-        toolBar.getItems().add(generateGenreComboBox(allGenres));
+        ObservableList<Node> toolBarItems = toolBar.getItems();
+        toolBarItems.add(new Label("Enclosing Folder:"));
+        toolBarItems.add(generateEnclosingFolderComboBox(folderMap, movieInfos));
+        toolBarItems.add(new Label("Sort By:"));
+        toolBarItems.add(generateSortByComboBox());
+        toolBarItems.add(new Label("Genre:"));
+        toolBarItems.add(generateGenreComboBox(allGenres));
 
-        toolBar.getItems().add(generateRandomButton());
-        toolBar.getItems().add(generateDeselectAllButton());
-        toolBar.getItems().add(generateSearchBar());
+        toolBarItems.add(generateRandomButton());
+        toolBarItems.add(generateDeselectAllButton());
+        toolBarItems.add(generateSearchBar());
+
+        HBox spacer = new HBox();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        toolBarItems.add(spacer);
+        toolBarItems.add(generateLocateVLCButton());
 
         return toolBar;
     }
