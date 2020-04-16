@@ -1,0 +1,47 @@
+.root {
+    -fx-background-color: #1f262d;
+}
+
+
+.main-area {
+    -fx-background-color: #1f262d;
+}
+
+.scroll-pane > .viewport {
+   -fx-background-color: transparent;
+
+}
+.scroll-pane {
+   -fx-background-color: transparent;
+}
+
+.poster:hover {
+    -fx-cursor: hand;
+}
+
+.tooltip {
+    -fx-wrap-text: true;
+    -fx-font-size: 16;
+}
+
+.control-bar {
+    -fx-background-color: #14181c;
+}
+
+.label {
+     -fx-text-fill: white;
+     -fx-text-alignment: center;
+}
+
+.glowing > .label {
+  -fx-text-fill: black !important;
+}
+
+.glowing {
+  -fx-background-color: yellow;
+  -fx-background-insets: -1.4, 0, 1;
+  -fx-background-radius: 0 0 5 5;
+  -fx-border-radius: 0 0 5 5;
+
+
+}
