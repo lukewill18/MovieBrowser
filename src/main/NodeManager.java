@@ -4,11 +4,10 @@ import com.google.common.collect.Multimap;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.TextAlignment;
@@ -19,14 +18,14 @@ public class NodeManager {
     static class yearAscendingComparator implements Comparator<MovieInfo> {
         @Override
         public int compare(MovieInfo movieInfo1, MovieInfo movieInfo2) {
-            return movieInfo2.year - movieInfo1.year;
+            return movieInfo2.year.compareTo(movieInfo1.year);
         }
     }
 
     static class yearDescendingComparator implements Comparator<MovieInfo> {
         @Override
         public int compare(MovieInfo movieInfo1, MovieInfo movieInfo2) {
-            return movieInfo1.year - movieInfo2.year;
+            return movieInfo1.year.compareTo(movieInfo2.year);
         }
     }
 
@@ -37,18 +36,33 @@ public class NodeManager {
         }
     }
 
+    static class imdbRatingAscendingComparator implements Comparator<MovieInfo> {
+        @Override
+        public int compare(MovieInfo movieInfo1, MovieInfo movieInfo2) {
+            return movieInfo2.imdbRating.compareTo(movieInfo1.imdbRating);
+        }
+    }
+
+    static class imdbRatingDescendingComparator implements Comparator<MovieInfo> {
+        @Override
+        public int compare(MovieInfo movieInfo1, MovieInfo movieInfo2) {
+            return movieInfo1.imdbRating.compareTo(movieInfo2.imdbRating);
+        }
+    }
+
     static final int POSTER_WIDTH = 150;
     private FileManager fileManager;
 
     private Comparator<MovieInfo> currentComparator;
-    private List<MovieInfo> inCurrentFolder = new ArrayList<>();
+    private List<MovieInfo> inCurrentFolder;
     private String currentGenre;
     private HashSet<MovieInfo> randomPool;
 
     NodeManager(FileManager f) {
-        currentComparator = new yearDescendingComparator();
+        currentComparator = new yearAscendingComparator();
         currentGenre = "All";
         randomPool = new HashSet<>();
+        inCurrentFolder = new ArrayList<>();
         fileManager = f;
     }
 
@@ -56,17 +70,16 @@ public class NodeManager {
         inCurrentFolder = movieInfos;
     }
 
-    private void setInvisible(List<MovieInfo> movieInfos) {
+    void setInvisible(List<MovieInfo> movieInfos) {
         for (MovieInfo movieInfo : movieInfos) {
             if (movieInfo.view != null) {
                 movieInfo.view.setVisible(false);
                 movieInfo.view.setManaged(false);
-                movieInfo.view.toBack();
             }
         }
     }
 
-    private void setVisible(List<MovieInfo> movieInfos) {
+    void setVisible(List<MovieInfo> movieInfos) {
         movieInfos.sort(currentComparator);
         for (MovieInfo movieInfo : movieInfos) {
             if (movieInfo.view != null) {
@@ -90,7 +103,7 @@ public class NodeManager {
         return filtered;
     }
 
-    ComboBox<String> generateEnclosingFolderComboBox(Multimap<String, MovieInfo> folderMap,
+    private ComboBox<String> generateEnclosingFolderComboBox(Multimap<String, MovieInfo> folderMap,
                                                      ArrayList<MovieInfo> movieInfos) {
         ComboBox<String> comboBox = new ComboBox<String>();
         comboBox.getItems().add("All");
@@ -114,20 +127,27 @@ public class NodeManager {
         return comboBox;
     }
 
-    ComboBox<String> generateSortByComboBox() {
+    private ComboBox<String> generateSortByComboBox() {
         ComboBox<String> comboBox = new ComboBox<String>();
-        comboBox.getItems().addAll("Year (Ascending)", "Year (Descending)", "Title");
+        comboBox.getItems().addAll("Year (Asc)", "Year (Desc)", "Title", "IMDB Rating (Asc)",
+                "IMDB Rating (Desc)");
         EventHandler<ActionEvent> event =
             e -> {
                 String selected = comboBox.getValue();
-                if (selected.equals("Year (Ascending)")) {
+                if (selected.equals("Year (Asc)")) {
                     currentComparator = new yearAscendingComparator();
                 }
-                else if(selected.equals("Year (Descending)")) {
+                else if(selected.equals("Year (Desc)")) {
                     currentComparator = new yearDescendingComparator();
                 }
-                else {
+                else if(selected.equals("Title")){
                     currentComparator = new titleComparator();
+                }
+                else if(selected.equals("IMDB Rating (Asc)")){
+                    currentComparator = new imdbRatingAscendingComparator();
+                }
+                else {
+                    currentComparator = new imdbRatingDescendingComparator();
                 }
                 setInvisible(inCurrentFolder);
                 List<MovieInfo> toShow = filterGenre(inCurrentFolder, currentGenre);
@@ -135,14 +155,12 @@ public class NodeManager {
             };
 
         comboBox.setOnAction(event);
-        // Initially sort by year (ascending)
-        comboBox.getSelectionModel().selectFirst();
-        setVisible(inCurrentFolder);
+        comboBox.getSelectionModel().selectFirst();;
         return comboBox;
     }
 
 
-    ComboBox<String> generateGenreComboBox(Set<String> allGenres) {
+    private ComboBox<String> generateGenreComboBox(Set<String> allGenres) {
         ComboBox<String> comboBox = new ComboBox<String>();
         comboBox.getItems().add("All");
         List<String> sortedGenres = new ArrayList<>(allGenres);
@@ -166,7 +184,7 @@ public class NodeManager {
         return comboBox;
     }
 
-    Button generateRandomButton() {
+    private Button generateRandomButton() {
         Button button = new Button("Play Random");
         Random random = new Random();
         random.setSeed(System.currentTimeMillis());
@@ -190,7 +208,7 @@ public class NodeManager {
         return button;
     }
 
-    Button generateDeselectAllButton() {
+    private Button generateDeselectAllButton() {
         Button button = new Button("Deselect All");
         button.setOnAction(event -> {
             for(MovieInfo movieInfo : randomPool) {
@@ -229,10 +247,62 @@ public class NodeManager {
         return poster;
     }
 
-    Label generatePosterLabel(String title, int year) {
+    Label generatePosterLabel(String title, String year) {
         Label label = new Label(title + " (" + year + ")");
         label.setWrapText(true);
         label.setTextAlignment(TextAlignment.CENTER);
         return label;
+    }
+
+    private TextField generateSearchBar() {
+        TextField textBox = new TextField();
+        textBox.setPromptText("Search");
+        textBox.setOnKeyReleased(e -> {
+            KeyCode keycode = e.getCode();
+            if (keycode == KeyCode.ENTER){
+                String query = textBox.getText().trim().toLowerCase();
+                List<MovieInfo> candidates = filterGenre(inCurrentFolder, currentGenre);
+                if(query.isEmpty()) {
+                    setVisible(candidates);
+                }
+                else {
+                    setInvisible(inCurrentFolder);
+                    Set<String> searchTerms = new HashSet<>(Arrays.asList((query.split(" "))));
+                    List<MovieInfo> results = new ArrayList<>();
+
+                    for(MovieInfo movieInfo : candidates) {
+                        if(movieInfo.tags.containsAll(searchTerms)) {
+                            results.add(movieInfo);
+                        }
+                    }
+                    setVisible(results);
+                }
+            }
+            else if(keycode == KeyCode.BACK_SPACE || keycode == KeyCode.DELETE) {
+                if(textBox.getText().trim().isEmpty()) {
+                    setVisible(filterGenre(inCurrentFolder, currentGenre));
+                }
+            }
+        });
+
+        return textBox;
+    }
+
+    ToolBar generateToolBar(Multimap<String, MovieInfo> folderMap, ArrayList<MovieInfo> movieInfos,
+                            Set<String> allGenres) {
+        ToolBar toolBar = new ToolBar();
+        toolBar.getStyleClass().add("control-bar");
+        toolBar.getItems().add(new Label("Enclosing Folder:"));
+        toolBar.getItems().add(generateEnclosingFolderComboBox(folderMap, movieInfos));
+        toolBar.getItems().add(new Label("Sort By:"));
+        toolBar.getItems().add(generateSortByComboBox());
+        toolBar.getItems().add(new Label("Genre:"));
+        toolBar.getItems().add(generateGenreComboBox(allGenres));
+
+        toolBar.getItems().add(generateRandomButton());
+        toolBar.getItems().add(generateDeselectAllButton());
+        toolBar.getItems().add(generateSearchBar());
+
+        return toolBar;
     }
 }

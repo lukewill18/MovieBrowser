@@ -126,9 +126,10 @@ public class FileManager {
         if(jsonResponse.has("Error")) {
             return null;
         }
-        return new MovieInfo(jsonResponse.getString("Title"), Integer.parseInt(jsonResponse.getString("Year")),
+        return new MovieInfo(jsonResponse.getString("Title"), jsonResponse.getString("Year"),
                 jsonResponse.getString("Genre"), jsonResponse.getString("Plot"),
-                jsonResponse.getString("Poster"), absolutePath, subtitleAbsolutePath);
+                jsonResponse.getString("Poster"), absolutePath, subtitleAbsolutePath,
+                jsonResponse.getString("imdbRating"), jsonResponse.getString("Director"));
     }
 
     private MovieInfo sendAPIRequest(String year, String title, String originalTitle, String absolutePath,
@@ -151,9 +152,9 @@ public class FileManager {
             if(jsonResponse.has("Error")) {
                 return null;
             }
-            return new MovieInfo(originalTitle, Integer.parseInt(year), jsonResponse.getString("Genre"),
+            return new MovieInfo(originalTitle, year, jsonResponse.getString("Genre"),
                     jsonResponse.getString("Plot"), jsonResponse.getString("Poster"), absolutePath,
-                    subtitleAbsolutePath);
+                    subtitleAbsolutePath, jsonResponse.getString("imdbRating"), jsonResponse.getString("Director"));
         } catch (IOException | JSONException e) {
             e.printStackTrace();
         }

@@ -38,6 +38,7 @@ public class Main extends Application {
 
     private FlowPane initRoot(Stage primaryStage, Multimap<String, MovieInfo> folderMap, ArrayList<MovieInfo> movieInfos) {
         primaryStage.setTitle("Movie Browser");
+        primaryStage.setMaximized(true);
         primaryStage.getIcons().add(new Image("file:.style/icon.png"));
 
         FlowPane mainArea = new FlowPane();
@@ -50,18 +51,7 @@ public class Main extends Application {
         scrollPane.setFitToWidth(true);
 
         nodeManager.setInCurrentFolder(movieInfos);
-        ToolBar toolBar = new ToolBar();
-        toolBar.getStyleClass().add("control-bar");
-        toolBar.getItems().add(new Label("Enclosing Folder:"));
-        toolBar.getItems().add(nodeManager.generateEnclosingFolderComboBox(folderMap, movieInfos));
-        toolBar.getItems().add(new Label("Sort By:"));
-        toolBar.getItems().add(nodeManager.generateSortByComboBox());
-        toolBar.getItems().add(new Label("Genre:"));
-        toolBar.getItems().add(nodeManager.generateGenreComboBox(allGenres));
-
-        toolBar.getItems().add(nodeManager.generateRandomButton());
-        toolBar.getItems().add(nodeManager.generateDeselectAllButton());
-
+        ToolBar toolBar = nodeManager.generateToolBar(folderMap, movieInfos, allGenres);
         VBox layout = new VBox(toolBar, scrollPane);
 
         Scene scene = new Scene(layout, 600, 400);
@@ -81,7 +71,8 @@ public class Main extends Application {
             ImageView poster = nodeManager.generatePoster(movieInfo);
             Label label = nodeManager.generatePosterLabel(movieInfo.title, movieInfo.year);
 
-            Tooltip plotSummary = new Tooltip(movieInfo.plot);
+            Tooltip plotSummary = new Tooltip(movieInfo.plot  + "\nIMDB Rating: " + movieInfo.imdbRating +
+                    "\nDirector: " + movieInfo.director);
             plotSummary.setPrefWidth(500);
             Tooltip.install(imageViewWrapper, plotSummary);
 
@@ -89,6 +80,7 @@ public class Main extends Application {
             movieInfo.setView(imageViewWrapper);
             layout.getChildren().add(imageViewWrapper);
         }
+        nodeManager.setInvisible(movieInfos);
     }
 
     @Override
@@ -132,6 +124,7 @@ public class Main extends Application {
             }
         }
         initWindow(primaryStage, movieInfos, folderMap);
+        nodeManager.setVisible(movieInfos);
     }
 
     public static void main(String[] args) {
