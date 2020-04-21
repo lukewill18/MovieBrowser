@@ -269,7 +269,7 @@ class NodeManager {
         Button button = new Button("Set VLC Location");
         button.setOnAction(event -> {
             try {
-                fileManager.chooseVLCFile(new File(FileManager.VLC_PATH_CACHE), primaryStage);
+                fileManager.chooseVLCFile(new File(fileManager.VLC_PATH_CACHE), primaryStage);
             } catch (Exception e) {
                 e.printStackTrace();
             }

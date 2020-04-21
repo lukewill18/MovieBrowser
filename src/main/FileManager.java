@@ -7,17 +7,34 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.*;
 import java.util.Collection;
 
 class FileManager {
     private String VLCLocation = "";
     private static final String DATA_CACHE_DIR = ".movieBrowserCache";
-    static final String VLC_PATH_CACHE = DATA_CACHE_DIR + "/.vlcPath.cache";
+    String VLC_PATH_CACHE;
     private static final String API_URL = "http://www.omdbapi.com/?t=%s&y=%s&apikey=8b79c8d6";
 
-    FileManager() { }
+    FileManager() {
+        VLC_PATH_CACHE = DATA_CACHE_DIR + String.format("/.%s-vlcPath.cache", getMacAddress());
+    }
+
+    String getMacAddress() {
+        try {
+            InetAddress ip = InetAddress.getLocalHost();
+            NetworkInterface networkInterface = NetworkInterface.getByInetAddress(ip);
+            byte[] mac = networkInterface.getHardwareAddress();
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < mac.length; i++) {
+                sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
+            }
+            return sb.toString();
+        } catch (UnknownHostException | SocketException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
     Collection<File> getMovieFiles() {
         File dir = new File(".");
         return FileUtils.listFiles(
@@ -176,5 +193,4 @@ class FileManager {
         }
         return movieInfo;
     }
-
 }
