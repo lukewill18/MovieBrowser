@@ -26,7 +26,6 @@ public class Main extends Application {
 
     private FlowPane initRoot(Stage primaryStage, Multimap<String, MovieInfo> folderMap, ArrayList<MovieInfo> movieInfos) {
         primaryStage.setTitle("Movie Browser");
-        primaryStage.setMaximized(true);
         primaryStage.getIcons().add(new Image("file:.style/icon.png"));
 
         FlowPane mainArea = new FlowPane();
@@ -45,12 +44,14 @@ public class Main extends Application {
         Scene scene = new Scene(layout, 600, 400);
         scene.getStylesheets().add("file:.style/style.css");
         primaryStage.setScene(scene);
+        // No idea why this has to be done but it works
+        primaryStage.setMaximized(false);
+        primaryStage.setMaximized(true);
         return mainArea;
     }
 
     private void initWindow(Stage primaryStage, ArrayList<MovieInfo> movieInfos, Multimap<String, MovieInfo> folderMap) {
         FlowPane layout = initRoot(primaryStage, folderMap, movieInfos);
-        primaryStage.show();
 
         for(MovieInfo movieInfo : movieInfos) {
             VBox imageViewWrapper = new VBox();
@@ -73,8 +74,20 @@ public class Main extends Application {
         nodeManager.setInvisible(movieInfos);
     }
 
+    private void displayLoading(Stage primaryStage) {
+        primaryStage.setTitle("Movie Browser");
+        primaryStage.getIcons().add(new Image("file:.style/icon.png"));
+        ProgressIndicator progressIndicator = new ProgressIndicator();
+        Scene scene = new Scene(progressIndicator, 600, 400);
+        scene.getStylesheets().add("file:.style/style.css");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+        primaryStage.setMaximized(true);
+    }
+
     @Override
     public void start(Stage primaryStage) throws Exception {
+        displayLoading(primaryStage);
         allGenres = new HashSet<>();
         fileManager = new FileManager();
         nodeManager = new NodeManager(fileManager, primaryStage);
