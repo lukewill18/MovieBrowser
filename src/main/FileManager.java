@@ -48,7 +48,7 @@ class FileManager {
         File dir = new File(".");
         return FileUtils.listFiles(
                 dir,
-                new String[]{"srt"},
+                new String[]{"srt", "sub"},
                 true
         );
     }
@@ -142,12 +142,13 @@ class FileManager {
         if(jsonResponse.has("Error")) {
             return new MovieInfo(cacheFile.getName().substring(8, cacheFile.getName().length() - 9),
                     cacheFile.getName().substring(1, 5), "", "",  "file:.style/filenotfound.png",
-                    absolutePath, subtitleAbsolutePath, "", "");
+                    absolutePath, subtitleAbsolutePath, "", "", 0);
         }
         return new MovieInfo(jsonResponse.getString("Title"), jsonResponse.getString("Year"),
                 jsonResponse.getString("Genre"), jsonResponse.getString("Plot"),
                 jsonResponse.getString("Poster"), absolutePath, subtitleAbsolutePath,
-                jsonResponse.getString("imdbRating"), jsonResponse.getString("Director"));
+                jsonResponse.getString("imdbRating"), jsonResponse.getString("Director"),
+                Integer.parseInt(jsonResponse.getString("Runtime").split(" ")[0]));
     }
 
     private MovieInfo sendAPIRequest(String year, String title, String originalTitle, String absolutePath,
@@ -169,11 +170,12 @@ class FileManager {
             cacheResponse(response.toString(), cacheFile);
             if(jsonResponse.has("Error")) {
                 return new MovieInfo(originalTitle, year, "", "",  "file:.style/filenotfound.png",
-                        absolutePath, subtitleAbsolutePath, "", "");
+                        absolutePath, subtitleAbsolutePath, "", "", 0);
             }
             return new MovieInfo(originalTitle, year, jsonResponse.getString("Genre"),
                     jsonResponse.getString("Plot"), jsonResponse.getString("Poster"), absolutePath,
-                    subtitleAbsolutePath, jsonResponse.getString("imdbRating"), jsonResponse.getString("Director"));
+                    subtitleAbsolutePath, jsonResponse.getString("imdbRating"), jsonResponse.getString("Director"),
+                    Integer.parseInt(jsonResponse.getString("Runtime").split(" ")[0]));
         } catch (IOException | JSONException e) {
             e.printStackTrace();
         }

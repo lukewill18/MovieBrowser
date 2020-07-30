@@ -11,6 +11,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.*;
 import java.util.*;
@@ -44,6 +45,7 @@ public class Main extends Application {
         Scene scene = new Scene(layout, 600, 400);
         scene.getStylesheets().add("file:.style/style.css");
         primaryStage.setScene(scene);
+
         // No idea why this has to be done but it works
         primaryStage.setMaximized(false);
         primaryStage.setMaximized(true);
@@ -62,8 +64,11 @@ public class Main extends Application {
 
             if(movieInfo.plot.length() > 0) { // In case movie info is not found in database
                 Tooltip plotSummary = new Tooltip(movieInfo.plot  + "\nIMDB Rating: " + movieInfo.imdbRating +
-                        "\nDirector: " + movieInfo.director + "\nGenres: " + String.join(", ", movieInfo.genres));
+                        "\nDirector: " + movieInfo.director + "\nGenres: " + String.join(", ", movieInfo.genres)
+                + "\nRuntime: " + movieInfo.runtime + " min");
                 plotSummary.setPrefWidth(500);
+                plotSummary.setShowDelay(Duration.millis(50));
+                plotSummary.setShowDuration(Duration.INDEFINITE);
                 Tooltip.install(imageViewWrapper, plotSummary);
             }
 

@@ -7,11 +7,12 @@ import java.util.HashSet;
 
 public class MovieInfo {
     String title, year, plot, posterURL, absolutePath, subtitleAbsolutePath, imdbRating, director;
+    int runtime;
     HashSet<String> genres;
     HashSet<String> tags;
 
     VBox view;
-    MovieInfo(String t, String y, String g, String p, String pu, String a, String s, String i, String d) {
+    MovieInfo(String t, String y, String g, String p, String pu, String a, String s, String i, String d, int r) {
         this.year = y;
         this.title = t;
         this.genres = new HashSet<>(Arrays.asList(g.split(", ")));
@@ -21,6 +22,7 @@ public class MovieInfo {
         this.subtitleAbsolutePath = s;
         this.imdbRating = i;
         this.director = d;
+        this.runtime = r;
         this.view = null;
 
         this.tags = new HashSet<>();

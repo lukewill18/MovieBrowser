@@ -56,6 +56,19 @@ class NodeManager {
         }
     }
 
+    static class runtimeAscendingComparator implements Comparator<MovieInfo> {
+        @Override
+        public int compare(MovieInfo movieInfo1, MovieInfo movieInfo2) {
+            return movieInfo2.runtime - movieInfo1.runtime;
+        }
+    }
+    static class runtimeDescendingComparator implements Comparator<MovieInfo> {
+        @Override
+        public int compare(MovieInfo movieInfo1, MovieInfo movieInfo2) {
+            return movieInfo1.runtime - movieInfo2.runtime;
+        }
+    }
+
     static final int POSTER_WIDTH = 150;
     private FileManager fileManager;
 
@@ -141,25 +154,32 @@ class NodeManager {
 
     private ComboBox<String> generateSortByComboBox() {
         ComboBox<String> comboBox = new ComboBox<String>();
-        comboBox.getItems().addAll("Year (Asc)", "Year (Desc)", "Title", "IMDB Rating (Asc)",
-                "IMDB Rating (Desc)");
+        comboBox.getItems().addAll("Year (Low to High)", "Year (High to Low)", "Title",
+                "IMDB Rating (Low to High)", "IMDB Rating (High to Low)", "Runtime (Low to High)",
+                "Runtime (High to Low)");
         EventHandler<ActionEvent> event =
             e -> {
                 String selected = comboBox.getValue();
-                if (selected.equals("Year (Asc)")) {
+                if (selected.equals("Year (Low to High)")) {
                     currentComparator = new yearAscendingComparator();
                 }
-                else if(selected.equals("Year (Desc)")) {
+                else if(selected.equals("Year (High to Low)")) {
                     currentComparator = new yearDescendingComparator();
                 }
                 else if(selected.equals("Title")){
                     currentComparator = new titleComparator();
                 }
-                else if(selected.equals("IMDB Rating (Asc)")){
+                else if(selected.equals("IMDB Rating (Low to High)")){
                     currentComparator = new imdbRatingAscendingComparator();
                 }
-                else {
+                else if(selected.equals("IMDB Rating (High to Low)")){
                     currentComparator = new imdbRatingDescendingComparator();
+                }
+                else if(selected.equals("Runtime (Low to High)")) {
+                    currentComparator = new runtimeAscendingComparator();
+                }
+                else {
+                    currentComparator = new runtimeDescendingComparator();
                 }
                 setInvisible(inCurrentFolder);
                 List<MovieInfo> toShow = filterGenre(inCurrentFolder, currentGenre);
@@ -241,7 +261,10 @@ class NodeManager {
 
         poster.getStyleClass().add("poster");
         poster.setOnMouseClicked((MouseEvent e) -> {
-            if (e.getButton() == MouseButton.SECONDARY) {
+            if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY) {
+                fileManager.playMovie(movieInfo.absolutePath, movieInfo.subtitleAbsolutePath);
+            }
+            else {
                 if (!randomPool.contains(movieInfo)) {
                     randomPool.add(movieInfo);
                     movieInfo.view.getStyleClass().add("glowing");
@@ -250,10 +273,6 @@ class NodeManager {
                     movieInfo.view.getStyleClass().remove("glowing");
                 }
             }
-            else {
-                fileManager.playMovie(movieInfo.absolutePath, movieInfo.subtitleAbsolutePath);
-            }
-
         });
         return poster;
     }
