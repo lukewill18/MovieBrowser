@@ -71,7 +71,8 @@ public class Main extends Application {
                 plotSummary.setShowDuration(Duration.INDEFINITE);
                 Tooltip.install(imageViewWrapper, plotSummary);
             }
-
+            nodeManager.makeWrapperClickable(imageViewWrapper, movieInfo);
+            imageViewWrapper.getStyleClass().add("wrapper");
             imageViewWrapper.getChildren().addAll(poster, label);
             movieInfo.setView(imageViewWrapper);
             layout.getChildren().add(imageViewWrapper);

@@ -14,6 +14,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
@@ -252,6 +253,9 @@ class NodeManager {
 
     ImageView generatePoster(MovieInfo movieInfo) {
         Image image = new Image(movieInfo.posterURL);
+        if(image.getWidth() == 0) { // URL is bad
+            image = new Image("file:.style/filenotfound.png");
+        }
         ImageView poster = new ImageView();
         poster.setImage(image);
         poster.setFitWidth(POSTER_WIDTH);
@@ -259,8 +263,11 @@ class NodeManager {
         poster.setSmooth(true);
         poster.setCache(true);
 
-        poster.getStyleClass().add("poster");
-        poster.setOnMouseClicked((MouseEvent e) -> {
+        return poster;
+    }
+
+    void makeWrapperClickable(VBox imageView, MovieInfo movieInfo) {
+        imageView.setOnMouseClicked((MouseEvent e) -> {
             if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY) {
                 fileManager.playMovie(movieInfo.absolutePath, movieInfo.subtitleAbsolutePath);
             }
@@ -274,7 +281,6 @@ class NodeManager {
                 }
             }
         });
-        return poster;
     }
 
     Label generatePosterLabel(String title, String year) {
