@@ -252,9 +252,15 @@ class NodeManager {
     }
 
     ImageView generatePoster(MovieInfo movieInfo) {
-        Image image = new Image(movieInfo.posterURL);
-        if(image.getWidth() == 0) { // URL is bad
+        Image image = null;
+        if(movieInfo.posterURL.equals("N/A")) {
             image = new Image("file:.style/filenotfound.png");
+        }
+        else {
+            image = new Image(movieInfo.posterURL);
+            if(image.getWidth() == 0) { // URL is bad
+                image = new Image("file:.style/filenotfound.png");
+            }
         }
         ImageView poster = new ImageView();
         poster.setImage(image);
