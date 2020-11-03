@@ -39,7 +39,7 @@ class FileManager {
         File dir = new File(".");
         return FileUtils.listFiles(
                 dir,
-                new String[]{"mkv", "mp4", "avi", "VOB"},
+                new String[]{"mkv", "mp4", "avi", "VOB", "mpg"},
                 true
         );
     }
